@@ -1,3 +1,8 @@
+yum install yum-plugin-priorities vim wget ntp ntpdate ntp-doc openssh-server -y
+
+systemctl enable ntpd
+systemctl start ntpd
+
 yum install wget -y
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
@@ -5,41 +10,19 @@ wget -P /etc/yum.repos.d/ http://mirrors.aliyun.com/repo/epel-7.repo
 yum clean all 
 yum makecache
 
-yum install ntp ntpdate ntp-doc vim ansible yum-plugin-priorities ceph-mgr-dashboard -y
-yum update -y
-systemctl enable ntpd
-systemctl start ntpd
-firewall-cmd --zone=public --add-port=80-19999/tcp --permanent
-firewall-cmd --reload
+wget https://bootstrap.pypa.io/ez_setup.py -O - | python
 
+
+
+#########################admin############################
 cat << EOM > /etc/hosts
 192.168.40.129 node1
 192.168.40.130 node2
 192.168.40.131 node3
 EOM
 
-
-cat << EOM > /etc/yum.repos.d/ceph.repo
-[ceph-noarch]
-name=Ceph noarch packages
-baseurl=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/noarch/
-enabled=1
-gpgcheck=1
-type=rpm-md
-gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
-EOM
-yum update -y
-yum clean all 
-yum makecache
-
-export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7
-export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
-
 ssh-keygen
 ssh-copy-id root@node1
-sudo setenforce 0
-vim /etc/selinux/config
-
 cat << EOM > ~/.ssh/config
 Host node1
    Hostname node1
@@ -52,18 +35,51 @@ Host node3
    User root
 EOM
 
-sudo yum update -y
-sudo yum install ceph-deploy -y
+sudo setenforce 0
+vim /etc/selinux/config
+
+cat << EOM > /etc/yum.repos.d/ceph.repo
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/noarch/
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
+EOM
+export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7
+export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
+yum clean all 
+yum makecache
+
+yum update
+yum install ceph-deploy
+
+#####################################################
+
+
+###################node############################
+firewall-cmd --zone=public --add-port=80-19999/tcp --permanent
+firewall-cmd --reload
+setenforce 0
+
+###############################################
+
+
+
+##########admin 开始集群#############
+export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7
+export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 
 mkdir my-cluster
 cd my-cluster
 ceph-deploy new --cluster-network 192.168.40.0/24 --public-network 192.168.40.0/24 node{1,2,3}
 ceph-deploy install node1 node2 node3
-
 ceph-deploy mon create-initial
 ceph-deploy admin node1 node2 node3
 ceph-deploy mgr create node1 node2 node3
---
+ceph-deploy mds create node1
+
 ceph-deploy osd create --data /dev/sdb node1
 ceph-deploy osd create --data /dev/sdc node1
 ceph-deploy osd create --data /dev/sdb node2
@@ -71,41 +87,81 @@ ceph-deploy osd create --data /dev/sdc node2
 ceph-deploy osd create --data /dev/sdb node3
 ceph-deploy osd create --data /dev/sdc node3
 
-ceph-deploy mds create node1 node2 node3
+####################################
 
-ceph-deploy rgw create node1 //--default port 7480
-radosgw-admin user create --uid=root --display-name=root --system
-  "keys": [
+
+####admin 部署对象网关 #############
+ceph-deploy install --rgw node1 node2 node3
+ceph-deploy rgw create node1  //默认端口 7480 URL：http://192.168.40.129:7480
+
+ssh node1 radosgw-admin user create --uid="testuser" --display-name="First User"
+ "keys": [
         {
-            "user": "root",
-            "access_key": "QJFIYJPWV3DYDW1YUZ91",
-            "secret_key": "wHeehXLY6tPhGsIGAphSuq0Dmi9L0aHOgjuh6lcc"
+            "user": "testuser",
+            "access_key": "A8DWB6B4H2NDAOFWMP67",
+            "secret_key": "VFcNay4QuMgzGb6CLeuZPprzCXUyqHFkPm461gNg"
         }
     ],
+####################################
 
 
-ceph mgr module enable dashboard
-ceph config set mgr mgr/dashboard/ssl false
-ceph mgr module disable dashboard
-ceph mgr module enable dashboard
+####admin 部署看板 #############
+ssh node1 yum install ceph-mgr-dashboard -y
+ssh node2 yum install ceph-mgr-dashboard -y
+ssh node3 yum install ceph-mgr-dashboard -y
 
-ceph config set mgr mgr/dashboard/server_addr 192.168.40.129
-ceph config set mgr mgr/dashboard/server_port 8080
+ssh node1 ceph config set mgr mgr/dashboard/ssl false
 
-
+ssh node1 ceph config set mgr mgr/dashboard/server_addr 192.168.40.129
+ssh node1 ceph config set mgr mgr/dashboard/server_port 8080
 ceph config set mgr mgr/dashboard/node1/server_addr 192.168.40.129
 ceph config set mgr mgr/dashboard/node1/server_port 8080
-
 ceph config set mgr mgr/dashboard/node2/server_addr 192.168.40.130
 ceph config set mgr mgr/dashboard/node2/server_port 8080
-
 ceph config set mgr mgr/dashboard/node3/server_addr 192.168.40.131
 ceph config set mgr mgr/dashboard/node3/server_port 8080
 
-ceph dashboard ac-user-create admin 123456 administrator
+ssh node1 ceph mgr module enable dashboard
 
-ceph dashboard set-rgw-api-access-key QJFIYJPWV3DYDW1YUZ91
-ceph dashboard set-rgw-api-secret-key wHeehXLY6tPhGsIGAphSuq0Dmi9L0aHOgjuh6lcc
+ceph dashboard ac-user-create admin 123456 administrator
+radosgw-admin user create --uid=root --display-name=root  --system
+"keys": [
+        {
+            "user": "root",
+            "access_key": "Z9SKC6T3WX8ROZ88NO1D",
+            "secret_key": "eabcXexChWIbQV22BNvbq2EDYhHnJ99XUyPj6qQ5"
+        }
+ceph dashboard set-rgw-api-access-key Z9SKC6T3WX8ROZ88NO1D
+ceph dashboard set-rgw-api-secret-key eabcXexChWIbQV22BNvbq2EDYhHnJ99XUyPj6qQ5
 ceph dashboard set-rgw-api-host 192.168.40.129
 ceph dashboard set-rgw-api-port 7480
+ceph dashboard set-rgw-api-scheme http
+ceph dashboard set-rgw-api-user-id root
 ceph dashboard set-rgw-api-ssl-verify False
+####################################
+
+
+####修改桶权限
+
+<CORSConfiguration>
+ <CORSRule>
+   <AllowedOrigin>http://www.example.com</AllowedOrigin>
+
+   <AllowedMethod>PUT</AllowedMethod>
+   <AllowedMethod>POST</AllowedMethod>
+   <AllowedMethod>DELETE</AllowedMethod>
+
+   <AllowedHeader>*</AllowedHeader>
+ </CORSRule>
+ <CORSRule>
+   <AllowedOrigin>*</AllowedOrigin>
+   <AllowedMethod>GET</AllowedMethod>
+ </CORSRule>
+</CORSConfiguration>
+
+vim /etc/sysconfig/network-scripts/ifcfg-ens33
+IPADDR=192.168.40.130
+GATEWAY=192.168.40.2
+DNS1=192.168.40.2
+DNS2=114.114.114.114
+service network restart
