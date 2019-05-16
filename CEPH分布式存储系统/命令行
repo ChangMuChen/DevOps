@@ -38,6 +38,7 @@ EOM
 sudo setenforce 0
 vim /etc/selinux/config
 
+<**-
 cat << EOM > /etc/yum.repos.d/ceph.repo
 [ceph-noarch]
 name=Ceph noarch packages
@@ -47,7 +48,9 @@ gpgcheck=1
 type=rpm-md
 gpgkey=https://mirrors.aliyun.com/ceph/keys/release.asc
 EOM
-export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7
+--**>
+
+export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/
 export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 yum clean all 
 yum makecache
@@ -68,7 +71,7 @@ setenforce 0
 
 
 ##########admin 开始集群#############
-export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7
+export CEPH_DEPLOY_REPO_URL=https://mirrors.aliyun.com/ceph/rpm-nautilus/el7/
 export CEPH_DEPLOY_GPG_URL=https://mirrors.aliyun.com/ceph/keys/release.asc
 
 mkdir my-cluster
