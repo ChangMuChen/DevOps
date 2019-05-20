@@ -1,5 +1,5 @@
 # RabbitMQ 安装教程
->Docker 环境，安装教程：https://blog.muyuchenge.com/2019/04/03/centos-docker-安装教程/
+>Docker 环境，安装教程：https://github.com/ChangMuChen/DevOps/blob/master/Docker/Centos%20%E5%AE%89%E8%A3%85Docker.md
 
 ## 获取镜像
 ```
