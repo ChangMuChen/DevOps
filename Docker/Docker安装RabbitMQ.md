@@ -8,8 +8,7 @@ docker pull rabbitmq
 
 ## 启动容器
 ```
- docker run -itd --hostname np-rabbit --name np-rabbitmq-01 -e RABBITMQ_DEFAULT_USER=admin -e  \
-RABBITMQ_DEFAULT_PASS=NP123456 -p 5671:5671 -p 15672:15672 rabbitmq
+ docker run -itd --hostname np-rabbit --name np-rabbitmq-01 -e RABBITMQ_DEFAULT_USER=admin -e RABBITMQ_DEFAULT_PASS=NP123456 -p 5671:5671 -p 15672:15672 rabbitmq
 ```
 ## 启动插件
 ### 进入容器
