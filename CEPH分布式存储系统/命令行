@@ -1,0 +1,98 @@
+#####节点环境准备#####
+yum install yum-plugin-priorities vim wget ntp ntpdate ntp-doc openssh-server -y
+wget https://bootstrap.pypa.io/ez_setup.py -O - | python
+systemctl enable ntpd
+systemctl start ntpd
+
+firewall-cmd --zone=public --add-port=80-19999/tcp --permanent
+firewall-cmd --reload
+
+setenforce 0
+
+vim /etc/selinux/config
+
+
+####管理器环境准备#######
+yum install yum-plugin-priorities vim wget -y
+wget https://bootstrap.pypa.io/ez_setup.py -O - | python
+
+cat << EOM > /etc/hosts
+192.168.40.140 node1
+EOM
+
+
+
+ssh-keygen
+
+ssh-copy-id root@node1
+
+cat << EOM > ~/.ssh/config
+Host node1
+   Hostname node1
+   User root
+EOM
+
+#####管理器安装ceph-deploy######
+cat << EOM > /etc/yum.repos.d/ceph.repo
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=https://download.ceph.com/rpm-nautilus/el7/noarch
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=https://download.ceph.com/keys/release.asc
+EOM
+
+yum update
+yum install ceph-deploy -y
+
+
+#####使用ceph-deploy安装ceph到节点上#########
+mkdir my-cluster
+cd my-cluster
+ceph-deploy new --cluster-network 192.168.40.0/24 --public-network 192.168.40.0/24 node1
+
+#####如果是单服务器集群######
+# echo "osd crush chooseleaf type = 0" >> ceph.conf  
+
+#####如果是单服务器集群######
+
+ceph-deploy install --release nautilus node1
+ceph-deploy mon create-initial
+ceph-deploy admin node1
+ceph-deploy mgr create node1
+ceph-deploy mds create node1
+
+##查看硬盘用lsblk##
+
+ceph-deploy osd create --data /dev/sdb node1
+ceph-deploy osd create --data /dev/sdc node1
+ceph-deploy osd create --data /dev/sdd node1
+
+ceph-deploy rgw create node1
+
+
+#########节点部署看板##################
+yum install ceph-mgr-dashboard -y
+ceph config set mgr mgr/dashboard/jwt_token_ttl 288000
+ceph config set mgr mgr/dashboard/ssl false
+ceph config set mgr mgr/dashboard/server_addr 192.168.40.140
+ceph config set mgr mgr/dashboard/server_port 8080
+ceph config set mgr mgr/dashboard/node1/server_addr 192.168.40.140
+ceph config set mgr mgr/dashboard/node1/server_port 8080
+ceph mgr module enable dashboard
+ceph dashboard ac-user-create admin 123456 administrator
+radosgw-admin user create --uid=root --display-name=root  --system
+"keys": [
+        {
+            "user": "root",
+            "access_key": "Z9SKC6T3WX8ROZ88NO1D",
+            "secret_key": "eabcXexChWIbQV22BNvbq2EDYhHnJ99XUyPj6qQ5"
+        }
+ceph dashboard set-rgw-api-access-key O9IBACN3XJ8RJ03Z93RA
+ceph dashboard set-rgw-api-secret-key 3nvVBzQ1zj3J2zuM8YdOQo7W7fJ8gx6Ca59x6Z1r
+ceph dashboard set-rgw-api-host 192.168.40.140
+ceph dashboard set-rgw-api-port 7480
+ceph dashboard set-rgw-api-scheme http
+ceph dashboard set-rgw-api-user-id root
+ceph dashboard set-rgw-api-ssl-verify False
