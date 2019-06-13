@@ -1,0 +1,36 @@
+version: '3.7'
+services:
+  web:
+    image: 'gitlab/gitlab-ce:latest'
+    restart: always
+    container_name: gitlab
+    privileged: true
+    environment:
+      TZ: 'Asia/Shanghai'
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://192.168.1.119:8080'
+        gitlab_rails['time_zone'] = 'Asia/Shanghai'
+        gitlab_rails['gitlab_ssh_host'] = '192.168.1.119'
+        gitlab_rails['gitlab_shell_ssh_port'] = 8022
+        gitlab_rails['gitlab_email_enabled'] = true
+        gitlab_rails['gitlab_email_from'] = '***'
+        gitlab_rails['gitlab_email_display_name'] = 'changdaohang'
+        gitlab_rails['gitlab_email_reply_to'] = '***'
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = "smtp.qq.com"
+        gitlab_rails['smtp_port'] = 465
+        gitlab_rails['smtp_user_name'] = "***"
+        gitlab_rails['smtp_password'] = "***"
+        gitlab_rails['smtp_domain'] = "smtp.qq.com"
+        gitlab_rails['smtp_authentication'] = "login"
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_tls'] = true
+        # Add any other gitlab.rb configuration here, each on its own line
+    ports:
+      - '8080:80'
+      - '8022:22'
+    volumes:
+      - '/srv/gitlab/config:/etc/gitlab'
+      - '/srv/gitlab/logs:/var/log/gitlab'
+      - '/srv/gitlab/data:/var/opt/gitlab'
+      - '/etc/localtime:/etc/localtime'
