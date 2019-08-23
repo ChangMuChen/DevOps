@@ -138,12 +138,14 @@ systemctl disable firewalld
 
 ### host修改
 >所有节点运行
+```sh
 cat << EOM > /etc/hosts
 192.168.40.128 node1
 192.168.40.129 node2
 192.168.40.130 node3
 192.168.40.131 admin
 EOM
+```
 
 ### 关闭swap
 >所有节点运行
