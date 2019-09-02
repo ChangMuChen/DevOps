@@ -34,6 +34,7 @@ cat > /etc/docker/daemon.json <<EOF
   "log-opts": {
     "max-size": "100m"
   },
+  "insecure-registries":["http://172.16.50.96:6543"],
   "storage-driver": "overlay2",
   "storage-opts": [
     "overlay2.override_kernel_check=true"
@@ -48,84 +49,6 @@ systemctl daemon-reload
 systemctl restart docker
 systemctl enable docker
 ```
-### CRI-O
->所有节点
-
-#### 先决条件
-```sh
-modprobe overlay
-modprobe br_netfilter
-
-# Setup required sysctl params, these persist across reboots.
-cat > /etc/sysctl.d/99-kubernetes-cri.conf <<EOF
-net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-EOF
-
-sysctl --system
-```
-#### 安装与启动
-```sh
-# Install prerequisites
-yum-config-manager --add-repo=https://cbs.centos.org/repos/paas7-crio-311-candidate/x86_64/os/
-
-# Install CRI-O
-yum install -y runc
-yum install --nogpgcheck cri-o -y
-systemctl start crio
-```
-### containerd
->所有节点
-#### 先决条件
-```sh
-cat > /etc/modules-load.d/containerd.conf <<EOF
-overlay
-br_netfilter
-EOF
-modprobe overlay
-modprobe br_netfilter
-
-# Setup required sysctl params, these persist across reboots.
-cat > /etc/sysctl.d/99-kubernetes-cri.conf <<EOF
-net.bridge.bridge-nf-call-iptables  = 1
-net.ipv4.ip_forward                 = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-EOF
-
-sysctl --system
-```
-
-#### 安装与启动
-```sh
-# Install containerd
-## Set up the repository
-### Install required packages
-yum install yum-utils device-mapper-persistent-data lvm2 -y
-
-### Add docker repository
-yum-config-manager \
-    --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
-
-## Install containerd
-yum update -y && yum install containerd.io -y
-
-# Configure containerd
-mkdir -p /etc/containerd
-containerd config default > /etc/containerd/config.toml
-
-# Restart containerd
-systemctl restart containerd
-systemctl enable containerd
-```
-#### 设置cgroup driver
-```sh
-# 设置config.toml
-vim /etc/containerd/config.toml
-#修改内容如下
-plugins.cri.systemd_cgroup = true
-```
 
 ## 系统环境设置
 
@@ -138,12 +61,15 @@ systemctl disable firewalld
 
 ### host修改
 >所有节点运行
+
+```shell
 cat << EOM > /etc/hosts
 192.168.40.128 node1
 192.168.40.129 node2
 192.168.40.130 node3
 192.168.40.131 admin
 EOM
+```
 
 ### 关闭swap
 >所有节点运行
@@ -172,6 +98,7 @@ setenforce 0
 sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 cat <<EOF >  /etc/sysctl.d/k8s.conf
+net.ipv4.ip_forward                 = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 EOF
@@ -236,6 +163,9 @@ kubectl delete node node1
 #撤销部署
 kubeadm reset
 
+#开启代理
+kubectl proxy --address='0.0.0.0'  --accept-hosts='^*$'
+
 #私有仓库
 kubectl -n fortest create secret docker-registry devsecret --docker-server=172.16.50.96:6543 --docker-username=docker-dev --docker-password=NP123456  --docker-email=changdaohang@anpe.cn
 ```
@@ -261,7 +191,7 @@ kubectl get svc -n kube-system
 ### 产生Token
 ```sh
 kubectl create serviceaccount cluster-admin-dashboard-sa
-kubectl create clusterrolebinding cluster-admin-dashboard-sa \
+kubectl create clusterrolebinding etcd-certs \
   --clusterrole=cluster-admin \
   --serviceaccount=default:cluster-admin-dashboard-sa
 
@@ -289,3 +219,37 @@ kubectl get pod -n kube-system
 kubectl delete pod <pod name> -n kube-system
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta1/aio/deploy/recommended.yaml
 ```
+
+### NFS实现卷存储
+
+
+### 备忘
+```shell
+docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.15.3
+docker tag mirrorgooglecontainers/kube-apiserver-amd64:v1.15.3 k8s.gcr.io/kube-apiserver:v1.15.3
+
+docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.3
+docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.3 k8s.gcr.io/kube-controller-manager:v1.15.3
+
+docker pull mirrorgooglecontainers/kube-scheduler:v1.15.3
+docker tag mirrorgooglecontainers/kube-scheduler:v1.15.3 k8s.gcr.io/kube-scheduler:v1.15.3
+
+docker pull mirrorgooglecontainers/kube-proxy:v1.15.3
+docker tag mirrorgooglecontainers/kube-proxy:v1.15.3 k8s.gcr.io/kube-proxy:v1.15.3
+
+docker pull mirrorgooglecontainers/pause:3.1
+docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1
+
+docker pull mirrorgooglecontainers/etcd:3.3.10
+docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10
+
+docker pull coredns/coredns:1.3.1
+docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1
+
+docker pull vbouchaud/nfs-client-provisioner-arm64
+docker tag vbouchaud/nfs-client-provisioner-arm64 quay.io/external_storage/nfs-client-provisioner:v3.1.0-k8s1.11
+
+docker pull vbouchaud/nfs-client-provisioner
+docker tag vbouchaud/nfs-client-provisioner quay.io/external_storage/nfs-client-provisioner:v3.1.0-k8s1.11
+```
+
