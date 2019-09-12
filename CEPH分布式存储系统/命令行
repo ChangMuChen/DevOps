@@ -52,10 +52,10 @@ mkdir my-cluster
 cd my-cluster
 ceph-deploy new --cluster-network 192.168.40.0/24 --public-network 192.168.40.0/24 node1
 
-#####如果是单服务器集群######
+#####如果是单服务器集群 begin######
 # echo "osd crush chooseleaf type = 0" >> ceph.conf  
 
-#####如果是单服务器集群######
+#####如果是单服务器集群 end######
 
 ceph-deploy install --release nautilus node1
 ceph-deploy mon create-initial
