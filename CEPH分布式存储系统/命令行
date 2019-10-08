@@ -43,6 +43,17 @@ type=rpm-md
 gpgkey=https://download.ceph.com/keys/release.asc
 EOM
 
+/**国内镜像源**/
+cat << EOM > /etc/yum.repos.d/ceph.repo
+[ceph-noarch]
+name=Ceph noarch packages
+baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/noarch/
+enabled=1
+gpgcheck=1
+type=rpm-md
+gpgkey=http://mirrors.aliyun.com/ceph/keys/release.asc
+EOM
+
 yum update
 yum install ceph-deploy -y
 
