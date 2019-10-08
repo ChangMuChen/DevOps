@@ -54,6 +54,9 @@ type=rpm-md
 gpgkey=http://mirrors.aliyun.com/ceph/keys/release.asc
 EOM
 
+export CEPH_DEPLOY_REPO_URL=http://mirrors.aliyun.com/ceph/rpm-nautilus/el7
+export CEPH_DEPLOY_GPG_URL=http://mirrors.aliyun.com/ceph/keys/release.asc
+
 yum update
 yum install ceph-deploy -y
 
