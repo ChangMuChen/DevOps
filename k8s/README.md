@@ -225,26 +225,21 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-b
 
 ### 备忘
 ```shell
-docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.15.3
-docker tag mirrorgooglecontainers/kube-apiserver-amd64:v1.15.3 k8s.gcr.io/kube-apiserver:v1.15.3
+docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.16.0
+docker pull mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.0
+docker pull mirrorgooglecontainers/kube-scheduler-amd64:v1.16.0
+docker pull mirrorgooglecontainers/kube-proxy-amd64:v1.16.0
+docker pull mirrorgooglecontainers/pause-amd64:3.1
+docker pull mirrorgooglecontainers/etcd:3.3.15-0
+docker pull mirrorgooglecontainers/coredns:1.6.2
 
-docker pull mirrorgooglecontainers/kube-controller-manager:v1.15.3
-docker tag mirrorgooglecontainers/kube-controller-manager:v1.15.3 k8s.gcr.io/kube-controller-manager:v1.15.3
-
-docker pull mirrorgooglecontainers/kube-scheduler:v1.15.3
-docker tag mirrorgooglecontainers/kube-scheduler:v1.15.3 k8s.gcr.io/kube-scheduler:v1.15.3
-
-docker pull mirrorgooglecontainers/kube-proxy:v1.15.3
-docker tag mirrorgooglecontainers/kube-proxy:v1.15.3 k8s.gcr.io/kube-proxy:v1.15.3
-
-docker pull mirrorgooglecontainers/pause:3.1
-docker tag mirrorgooglecontainers/pause:3.1 k8s.gcr.io/pause:3.1
-
-docker pull mirrorgooglecontainers/etcd:3.3.10
-docker tag mirrorgooglecontainers/etcd:3.3.10 k8s.gcr.io/etcd:3.3.10
-
-docker pull coredns/coredns:1.3.1
-docker tag coredns/coredns:1.3.1 k8s.gcr.io/coredns:1.3.1
+docker tag mirrorgooglecontainers/kube-apiserver-amd64:v1.16.0 k8s.gcr.io/kube-apiserver:v1.16.0
+docker tag mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.0 k8s.gcr.io/kube-controller-manager:v1.16.0
+docker tag mirrorgooglecontainers/kube-scheduler-amd64:v1.16.0 k8s.gcr.io/kube-scheduler:v1.16.0
+docker tag mirrorgooglecontainers/kube-proxy-amd64:v1.16.0 k8s.gcr.io/kube-proxy:v1.16.0
+docker tag mirrorgooglecontainers/pause-amd64:3.1 k8s.gcr.io/pause:3.1
+docker tag mirrorgooglecontainers/etcd:3.3.15-0 k8s.gcr.io/etcd:3.3.15-0
+docker tag mirrorgooglecontainers/coredns:1.6.2 k8s.gcr.io/coredns:1.6.2
 
 docker pull vbouchaud/nfs-client-provisioner-arm64
 docker tag vbouchaud/nfs-client-provisioner-arm64 quay.io/external_storage/nfs-client-provisioner:v3.1.0-k8s1.11
