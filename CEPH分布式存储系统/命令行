@@ -47,7 +47,7 @@ EOM
 cat << EOM > /etc/yum.repos.d/ceph.repo
 [ceph-noarch]
 name=Ceph noarch packages
-baseurl=http://mirrors.aliyun.com/ceph/rpm-jewel/el7/noarch/
+baseurl=http://mirrors.aliyun.com/ceph/rpm-nautilus/el7/noarch/
 enabled=1
 gpgcheck=1
 type=rpm-md
