@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kubernetes-prometheus-pv
+  labels:
+    pv: kubernetes-prometheus-pv
+spec:
+  capacity:
+    storage: 300Gi
+  accessModes:
+    - ReadWriteMany
+  cephfs:
+    monitors:
+      - 192.168.1.7:6789
+      - 192.168.1.17:6789
+      - 192.168.1.37:6789
+    path: /k8s/kubernetes-prometheus
+    user: admin
+    secretRef:
+      name: ceph-secret
+    readOnly: false
