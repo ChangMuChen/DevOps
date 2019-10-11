@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: genoany-dev-mysql1-cephrbd-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  selector:
+    matchLabels:
+      pv: genoany-dev-mysql1-cephrbd-pv
