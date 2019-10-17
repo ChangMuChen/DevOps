@@ -225,6 +225,7 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-b
 
 ### 备忘
 ```shell
+kubeadm config images list  #查看需要的镜像
 docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.16.0
 docker pull mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.0
 docker pull mirrorgooglecontainers/kube-scheduler-amd64:v1.16.0
