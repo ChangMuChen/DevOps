@@ -5,6 +5,7 @@
 systemctl stop firewalld
 systemctl disable firewalld
 
+#关闭swap
 vi /etc/fstab 
 #注释掉swap那一行
 sysctl -p
