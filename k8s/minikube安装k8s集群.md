@@ -64,6 +64,7 @@ docker pull mirrorgooglecontainers/kube-proxy-amd64:v1.16.2
 docker pull mirrorgooglecontainers/pause-amd64:3.1
 docker pull mirrorgooglecontainers/etcd:3.3.15-0
 docker pull coredns/coredns:1.6.2
+docker pull mirrorgooglecontainers/kube-addon-manager-amd64:v9.0.2
 
 docker tag mirrorgooglecontainers/kube-apiserver-amd64:v1.16.2 k8s.gcr.io/kube-apiserver:v1.16.0
 docker tag mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.1 k8s.gcr.io/kube-controller-manager:v1.16.0
@@ -72,6 +73,7 @@ docker tag mirrorgooglecontainers/kube-proxy-amd64:v1.16.2 k8s.gcr.io/kube-proxy
 docker tag mirrorgooglecontainers/pause-amd64:3.1 k8s.gcr.io/pause:3.1
 docker tag mirrorgooglecontainers/etcd:3.3.15-0 k8s.gcr.io/etcd:3.3.15-0
 docker tag coredns/coredns:1.6.2 k8s.gcr.io/coredns:1.6.2
+docker tag mirrorgooglecontainers/kube-addon-manager-amd64:v9.0.2 k8s.gcr.io/kube-addon-manager:v9.0.2
 ```
 
 ## 启动
