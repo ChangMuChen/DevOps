@@ -110,3 +110,7 @@ EOF
 sysctl --system	
 yum install -y kubeadm kubectl --disableexcludes=kubernetes	
 ```
+## 查看节点
+```sh
+kubectl get nodes
+```
