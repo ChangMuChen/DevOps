@@ -122,12 +122,8 @@ kubectl get nodes
 ## 安装kuboard
 ```sh
 kubectl apply -f https://kuboard.cn/install-script/kuboard.yaml
-```
-## 打开kuboard
-```sh
+#打开
 http://{ip}:32567
-```
-## 获取token
-```sh
+#获取token
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep kuboard-user | awk '{print $1}')
 ```
