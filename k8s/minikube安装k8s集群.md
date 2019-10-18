@@ -44,7 +44,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubeadm kubectl --disableexcludes=kubernetes
 ```
 
 ## 安装minikube
