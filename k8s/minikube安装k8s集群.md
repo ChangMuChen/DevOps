@@ -118,3 +118,16 @@ yum install -y kubeadm kubectl --disableexcludes=kubernetes
 ```sh
 kubectl get nodes
 ```
+
+## 安装kuboard
+```sh
+kubectl apply -f https://kuboard.cn/install-script/kuboard.yaml
+```
+## 打开kuboard
+```sh
+http://{ip}:32567
+```
+## 获取token
+```sh
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep kuboard-user | awk '{print $1}')
+```
