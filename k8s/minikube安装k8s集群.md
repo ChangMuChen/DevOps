@@ -44,7 +44,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 
-yum install -y kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 ```
 
 ## 安装minikube
@@ -67,7 +67,7 @@ kubeadm config images list
 ### 拉取镜像并改名
 ```sh
 docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.16.2
-docker pull mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.2
+docker pull mirrorgooglecontainers/kube-controller-manager-amd64:v1.16.1
 docker pull mirrorgooglecontainers/kube-scheduler-amd64:v1.16.2
 docker pull mirrorgooglecontainers/kube-proxy-amd64:v1.16.2
 docker pull mirrorgooglecontainers/pause-amd64:3.1
