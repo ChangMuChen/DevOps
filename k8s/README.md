@@ -115,7 +115,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes  --image-repository registry.aliyuncs.com/google_containers
 systemctl enable --now kubelet
 systemctl restart --now kubelet
 
