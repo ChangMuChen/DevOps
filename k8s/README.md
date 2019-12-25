@@ -115,7 +115,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 sysctl --system
 
-yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes  --image-repository registry.aliyuncs.com/google_containers
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 systemctl enable --now kubelet
 systemctl restart --now kubelet
 
@@ -133,7 +133,7 @@ EOF
 ## 初始化master
 >master节点运行
 ```sh
-kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.40.131
+kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.40.131 --image-repository registry.aliyuncs.com/google_containers
 ```
 
 ## 命令可行
