@@ -11,6 +11,8 @@ setenforce 0
 
 vim /etc/selinux/config
 
+安装并启用企业Linux附加软件包（EPEL）存储库：
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 ####管理器环境准备#######
 yum install yum-plugin-priorities vim wget -y
