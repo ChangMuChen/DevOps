@@ -1,0 +1,66 @@
+# CEPH安装
+//https://docs.ceph.com/docs/master/cephadm/install/
+
+systemctl stop firewalld
+systemctl disable firewalld
+
+//修改系统环境
+vi /etc/hosts 
+firewall-cmd --zone=public --add-port=3300/tcp --permanent
+firewall-cmd --zone=public --add-port=6789/tcp --permanent
+firewall-cmd --zone=public --add-port=6800-7300/tcp --permanent
+firewall-cmd --zone=public --add-port=8080/tcp --permanent
+firewall-cmd --zone=public --add-port=8443/tcp --permanent
+firewall-cmd --zone=public --add-port=9283/tcp --permanent
+yum install gcc gcc-c++  zlib* libffi-devel kernel-devel  openssl-devel yum-plugin-priorities vim wget ntp ntpdate ntp-doc openssh-server  -y
+
+//安装gcc、python3
+wget -c https://www.python.org/ftp/python/3.7.7/Python-3.7.7.tgz
+tar -xvzf Python-3.7.7.tgz
+cd Python-3.7.7/
+./configure --prefix=/usr/python3 --with-ssl
+make
+make install
+ln -s /usr/python3/bin/python3 /usr/bin/python3
+ln -s /usr/python3/bin/pip3 /usr/bin/pip3
+
+
+//安装时间同步
+systemctl enable ntpd
+systemctl start ntpd
+
+
+//安装cephadmin
+curl --silent --remote-name --location https://github.com/ceph/ceph/raw/octopus/src/cephadm/cephadm
+chmod +x cephadm
+./cephadm add-repo --release octopus
+./cephadm install
+
+cephadm shell
+exit
+alias ceph='cephadm shell -- ceph'
+cephadm install ceph-common
+
+
+//引导新的集群
+mkdir -p /etc/ceph
+
+//准备配置文件
+vi ceph.conf
+[global]
+	osd_crush_chooseleaf_type = 0
+	osd_pool_default_size = 1
+
+cephadm bootstrap --config ceph.conf --mon-ip 172.18.68.67 --skip-pull --initial-dashboard-user admin --initial-dashboard-password 123456 --allow-fqdn-hostname --dashboard-password-noupdate
+ceph orch host set-addr master 172.18.68.67
+ceph orch daemon add osd master:/dev/sdb
+
+radosgw-admin realm create --rgw-realm=newpwr --default
+radosgw-admin zonegroup create --rgw-zonegroup=genoany --master --default
+radosgw-admin zone create --rgw-zonegroup=genoany --rgw-zone=default --master --default
+ceph orch apply rgw newpwr default --port=7480
+
+radosgw-admin user create --uid=admin --display-name=admin --system
+ceph dashboard set-rgw-api-access-key <KEY>
+ceph dashboard set-rgw-api-secret-key <KEY>
+ceph dashboard set-rgw-api-ssl-verify False
