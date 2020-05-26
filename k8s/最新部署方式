@@ -48,5 +48,6 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl apply -f https://kuboard.cn/install-script/kuboard.yaml
 kubectl apply -f https://addons.kuboard.cn/metrics-server/0.3.6/metrics-server.yaml
 kubectl -n kube-system create secret generic etcd-certs --from-file=/etc/kubernetes/pki/etcd/server.crt --from-file=/etc/kubernetes/pki/etcd/server.key
+kubectl apply -f eip-monitor-system.yaml
 
 watch kubectl get pods --all-namespaces
