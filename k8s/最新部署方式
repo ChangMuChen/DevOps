@@ -48,3 +48,5 @@ kubectl taint nodes --all node-role.kubernetes.io/master-
 kubectl apply -f https://kuboard.cn/install-script/kuboard.yaml
 kubectl apply -f https://addons.kuboard.cn/metrics-server/0.3.6/metrics-server.yaml
 
+
+watch kubectl get pods --all-namespaces
