@@ -12,8 +12,8 @@ firewall-cmd --zone=public --add-port=6800-7300/tcp --permanent
 firewall-cmd --zone=public --add-port=8080/tcp --permanent
 firewall-cmd --zone=public --add-port=8443/tcp --permanent
 firewall-cmd --zone=public --add-port=9283/tcp --permanent
-yum install gcc gcc-c++  zlib* libffi-devel kernel-devel  openssl-devel yum-plugin-priorities vim wget ntp ntpdate ntp-doc openssh-server  -y
-
+yum install gcc gcc-c++  zlib* libffi-devel kernel-devel  vim wget  -y
+// openssl-devel yum-plugin-priorities ntp ntpdate ntp-doc openssh-server 
 //安装gcc、python3
 wget -c https://www.python.org/ftp/python/3.7.7/Python-3.7.7.tgz
 tar -xvzf Python-3.7.7.tgz
