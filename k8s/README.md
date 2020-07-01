@@ -173,6 +173,9 @@ kubectl delete node node1
 #创建key并显示加入命令
 kubeadm token create --print-join-command
 
+#排除master污点
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
 #撤销部署
 kubeadm reset
 
