@@ -59,7 +59,9 @@ b) kubeadm alpha kubeconfig user –apiserver-advertise-address 127.0.0.1 –cli
 
 c）更新.kube文件
 
-cp -i /etc/kubernetes/admin.conf ~/.kube/config
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
 d) 测试kubectl
 
