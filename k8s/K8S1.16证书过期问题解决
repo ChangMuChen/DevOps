@@ -1,0 +1,70 @@
+以下内容摘抄网上帖子的：
+29号晚上同事发现部署的API接口服务崩了。同时k8s服务也崩了（我们自己写的API服务调用k8s）。当时就怀疑是k8s崩溃导致API调用失败，然后api报错退出（这里API容错机制也有问题，但不是这篇文章主题）。
+
+第二天来调查k8s问题：执行k8s命令报错
+
+[root@onlyellow2 ~]# kubectl get pod
+Unable to connect to the server: x509: certificate has expired or is not yet valid
+
+第一感觉就是证书过期了：因为部署的是1.16版本，k8s内部强制默认采用https通信。当时部署时候生成的证书默认有效期就是一年。而这套系统大概就是一年前部署的。
+
+所以查询资料一波
+
+执行下列命令确认是否是证书过期问题
+
+[root@onlyellow2 ~]# kubeadm alpha certs check-expiration
+CERTIFICATE EXPIRES RESIDUAL TIME EXTERNALLY MANAGED
+admin.conf Sep 29, 2020 12:39 UTC no
+apiserver Sep 29, 2020 12:39 UTC no
+apiserver-etcd-client Sep 29, 2020 12:39 UTC no
+apiserver-kubelet-client Sep 29, 2020 12:39 UTC no
+controller-manager.conf Sep 29, 2020 12:39 UTC no
+etcd-healthcheck-client Sep 29, 2020 12:39 UTC no
+etcd-peer Sep 29, 2020 12:39 UTC no
+etcd-server Sep 29, 2020 12:39 UTC no
+front-proxy-client Sep 29, 2020 12:39 UTC no
+scheduler.conf Sep 29, 2020 12:39 UTC no
+
+可以很清楚的看到：证书到29号就到期了。所以问题定位了。剩下的就是更新证书了
+
+去官网查询更新证书方法，官方提供两种更新办法：
+
+upgrade版本
+手工更新证书
+
+我想着新版本也出了好几个了，1.16也算老的了。但是发现更新要替换repo源，比较麻烦。算了还是手工更新下证书，先恢复下系统。
+
+更新步骤如下：
+
+a) kubeadm alpha certs renew all
+
+执行完这一步再去看看证书，会发现已经都更新过了
+
+[root@onlyellow2 ~]# kubeadm alpha certs check-expiration
+CERTIFICATE EXPIRES RESIDUAL TIME EXTERNALLY MANAGED
+admin.conf Sep 30, 2021 03:05 UTC 364d no
+apiserver Sep 30, 2021 03:05 UTC 364d no
+apiserver-etcd-client Sep 30, 2021 03:05 UTC 364d no
+apiserver-kubelet-client Sep 30, 2021 03:05 UTC 364d no
+controller-manager.conf Sep 30, 2021 03:05 UTC 364d no
+etcd-healthcheck-client Sep 30, 2021 03:05 UTC 364d no
+etcd-peer Sep 30, 2021 03:05 UTC 364d no
+etcd-server Sep 30, 2021 03:05 UTC 364d no
+front-proxy-client Sep 30, 2021 03:05 UTC 364d no
+scheduler.conf Sep 30, 2021 03:05 UTC 364d no
+
+b) kubeadm alpha kubeconfig user –apiserver-advertise-address 127.0.0.1 –client-name www.baidu.com
+
+这一步是更新配置kubelet配置文件，根据自己环境修改api的IP地址和主机域名
+
+c）更新.kube文件
+
+cp -i /etc/kubernetes/admin.conf ~/.kube/config
+
+d) 测试kubectl
+
+再次执行kubectl命令确认k8s是否恢复
+
+[root@onlyellow2 ~]# kubectl get nodes
+NAME STATUS ROLES AGE VERSION
+******************* Ready master 365d v1.16.0
