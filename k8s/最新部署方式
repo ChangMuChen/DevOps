@@ -42,6 +42,9 @@ mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
+//重新获取加入命令
+kubeadm token create --print-join-command
+
 kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 kubectl taint nodes --all node-role.kubernetes.io/master-
 
